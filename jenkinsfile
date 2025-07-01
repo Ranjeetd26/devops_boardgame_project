@@ -1,0 +1,33 @@
+pipeline{
+    agent none
+
+    tools {
+        maven 'mymvn'
+    }
+    environment {
+        build-server = 'ec2-user@172.31.90.252'
+        deploy-server = 'ec2-user@172.31.89.53'
+        image-name = "abhishek1127/boardgame_image:v${BUILD_NUMBER}"
+    }
+    stages{
+        
+        agent any
+        
+        stage('Compile') { //code compile
+            steps {
+             sh 'mvn compile'
+            }
+        }
+        stage('Test') { //test will run
+            steps {
+             sh 'mvn test'
+            }
+        }
+        stage('Package') { // creating trgt folder on ec2(build server)
+            steps {
+             sh 'mvn package'
+            }
+        }
+    }
+    
+}
