@@ -5,9 +5,9 @@ pipeline{
         maven 'mymvn'
     }
     environment {
-        build-server = 'ec2-user@172.31.90.252'
-        deploy-server = 'ec2-user@172.31.89.53'
-        image-name = "abhishek1127/boardgame_image:v${BUILD_NUMBER}"
+        BUILD_SERVER= 'ec2-user@172.31.90.252'
+        DEPLOY_SERVER = 'ec2-user@172.31.89.53'
+        IMAGE_NAME = "abhishek1127/boardgame_image:v${BUILD_NUMBER}"
     }
     stages{
         
