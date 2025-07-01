@@ -1,50 +1,59 @@
-pipeline{
+pipeline {
     agent any
 
     tools {
         maven 'mymvn'
     }
+
     environment {
-        BUILD_SERVER= 'ec2-user@172.31.90.252'
+        BUILD_SERVER = 'ec2-user@172.31.90.252'
         DEPLOY_SERVER = 'ec2-user@172.31.89.53'
         IMAGE_NAME = "abhishek1127/boardgame_image:v${BUILD_NUMBER}"
     }
-    stages{
-        
-        // agent any
-        
-        stage('Compile') { //code compile
+
+    stages {
+        stage('Compile') {
             steps {
-             sh 'mvn compile'
+                sh 'mvn compile'
             }
         }
-        // stage('Test') { //test will run
-        //     steps {
-        //      sh 'mvn test'
-        //     }
-        // }
-        stage('Package') { // creating trgt folder on ec2(build server)
+
+        stage('Package') {
             steps {
-             sh 'mvn package'
+                sh 'mvn package'
             }
         }
-        
-     stage('Dockerize Image And Push') {
+
+        stage('Dockerize Image And Push') {
             agent any
             steps {
                 sshagent(credentials: ['slave2']) {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
-                        echo "Dockerizing and pushing to Docker Hub"
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        echo "Preparing to Dockerize and push image: ${IMAGE_NAME}"
 
+                        // Check serverscript.sh exists
+                        sh 'ls -l serverscript.sh'
+
+                        // Copy script to remote build server
                         sh "scp -o StrictHostKeyChecking=no serverscript.sh ${BUILD_SERVER}:/home/ec2-user/"
+
+                        // Run the script with image name as argument
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash /home/ec2-user/serverscript.sh ${IMAGE_NAME}'"
+
+                        // Docker login
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
-                        sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
+
+                        // Push image to Docker Hub
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker push ${IMAGE_NAME}'"
                     }
                 }
             }
         }
-        
     }
-    
+
+    post {
+        failure {
+            echo "Pipeline failed. Check logs above for error details."
+        }
+    }
 }
