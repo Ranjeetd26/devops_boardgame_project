@@ -1,5 +1,5 @@
 pipeline{
-    agent none
+    agent any
 
     tools {
         maven 'mymvn'
@@ -11,7 +11,7 @@ pipeline{
     }
     stages{
         
-        agent any
+        // agent any
         
         stage('Compile') { //code compile
             steps {
