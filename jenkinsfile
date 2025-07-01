@@ -18,11 +18,11 @@ pipeline{
              sh 'mvn compile'
             }
         }
-        stage('Test') { //test will run
-            steps {
-             sh 'mvn test'
-            }
-        }
+        // stage('Test') { //test will run
+        //     steps {
+        //      sh 'mvn test'
+        //     }
+        // }
         stage('Package') { // creating trgt folder on ec2(build server)
             steps {
              sh 'mvn package'
