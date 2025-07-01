@@ -28,6 +28,23 @@ pipeline{
              sh 'mvn package'
             }
         }
+        
+     stage('Dockerize Image And Push') {
+            agent any
+            steps {
+                sshagent(credentials: ['slave2']) {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                        echo "Dockerizing and pushing to Docker Hub"
+
+                        sh "scp -o StrictHostKeyChecking=no serverscript.sh ${BUILD_SERVER}:/home/ec2-user/"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash /home/ec2-user/serverscript.sh ${IMAGE_NAME}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
+                        sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
+                    }
+                }
+            }
+        }
+        
     }
     
 }
