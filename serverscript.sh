@@ -14,4 +14,4 @@ fi
 
 cd /home/ec2-user/devops_boardgame_project
 git checkout master
-sudo docker build -t $1
+sudo docker build -t $1 .
