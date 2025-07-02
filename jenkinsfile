@@ -28,23 +28,13 @@ pipeline {
             agent any
             steps {
                 sshagent(credentials: ['slave2']) {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        echo "Preparing to Dockerize and push image: ${IMAGE_NAME}"
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                        echo "Dockerizing and pushing to Docker Hub"
 
-                        // Check serverscript.sh exists
-                        sh 'ls -l serverscript.sh'
-
-                        // Copy script to remote build server
                         sh "scp -o StrictHostKeyChecking=no serverscript.sh ${BUILD_SERVER}:/home/ec2-user/"
-
-                        // Run the script with image name as argument
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash /home/ec2-user/serverscript.sh ${IMAGE_NAME}'"
-
-                        // Docker login
                         sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
-
-                        // Push image to Docker Hub
-                        sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'sudo docker push ${IMAGE_NAME}'"
+                        sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
                     }
                 }
             }
