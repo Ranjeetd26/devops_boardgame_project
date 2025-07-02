@@ -9,7 +9,7 @@ then
   cd /home/ec2-user/devops_boardgame_project
   git pull origin master
 else
-  git clone https://github.com/Abhi1279/devops_boardgame_project.git
+  git clone https://github.com/Ranjeetd26/devops_boardgame_project.git
 fi
 
 cd /home/ec2-user/devops_boardgame_project
