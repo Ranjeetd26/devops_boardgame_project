@@ -39,11 +39,21 @@ pipeline {
                 }
             }
         }
-    }
+        stage('Deploy docker image'){
+            agent any
+            steps {
+                sshagent(credentials: ['slave2']) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'Username', passwordVariable: 'Password')]) {
+                        echo "Deploying Docker image"
 
-    post {
-        failure {
-            echo "Pipeline failed. Check logs above for error details."
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo yum install docker -y'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'sudo systemctl start docker'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'echo \"${PASSWORD}\" | sudo docker login -u \"${USERNAME}\" --password-stdin'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'docker pull ${IMAGE_NAME}'"
+                        sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'docker run -d -p 8080:8080 ${IMAGE_NAME}'"
+                    }
+                }
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ COPY pom.xml .
 RUN mvn dependency:go-offline
 
 COPY src ./src
-RUN mvn package -DskipTests
+RUN mvn package
 
 # Stage 2: Run the built JAR
 FROM openjdk:17-alpine
