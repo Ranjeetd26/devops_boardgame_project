@@ -18,11 +18,11 @@ pipeline {
             }
         }
 
-        stage('Package') {
-            steps {
-                sh 'mvn package'
-            }
-        }
+        // stage('Package') {
+        //     steps {
+        //         sh 'mvn package'
+        //     }
+        // }
 
         stage('Dockerize Image And Push') {
             agent any
